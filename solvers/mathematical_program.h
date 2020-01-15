@@ -2712,7 +2712,34 @@ class MathematicalProgram {
   }
 
   /**
+   * Returns the mapping from an indeterminate ID to its index in the vector
+   * containing all the indeterminates in the mathematical program.
+   */
+  const std::unordered_map<symbolic::Variable::Id, int>& indeterminates_index()
+      const {
+    return indeterminates_index_;
+  }
+
+  /**
+   * @anchor variable_scaling
+   * @name Variable scaling
+   * Some solvers (e.g. SNOPT) work better if the decision variables values
+   * are on the same scale. Hence, internally we scale the variable as
+   * snopt_var_value = var_value / scaling_factor.
+   * This scaling factor is only used inside the solve, so
+   * users don't need to manually scale the variables every time they appears in
+   * cost and constraints. When the users set the initial guess, or getting the
+   * result from MathematicalProgramResult::GetSolution(), the values are
+   * unscaled. Namely, MathematicalProgramResult::GetSolution(var) returns the
+   * value of var, not var_value / scaling_factor.
+   *
+   * The feature of variable scaling is currently only implemented for SNOPT.
+   */
+  //@{
+  /**
    * Returns the mapping from a decision variable index to its scaling factor.
+   *
+   * See @ref variable_scaling "Variable scaling" for more information.
    */
   const std::unordered_map<int, double>& GetVariableScaling() const {
     return var_scaling_map_;
@@ -2720,18 +2747,44 @@ class MathematicalProgram {
 
   /**
    * Setter for the scaling of decision variables.
-   * @param scale scaling factor.
+   * @param s scaling factor (must be positive).
    * @param idx index of the decision variable.
+   *
+   * See @ref variable_scaling "Variable scaling" for more information.
    */
-  void SetVariableScaling(double scale, int idx);
+  void SetVariableScaling(double s, int idx);
+
   /**
    * Setter for the scaling of decision variables starting from index @p
-   * idx_start to @p idx_end.
-   * @param scale scaling factor.
+   * idx_start to @p idx_end (including @p idx_end).
+   * @param s scaling factor (must be positive).
    * @param idx_start index of the start of the decision variables.
    * @param idx_end index of the end of the decision variables.
+   *
+   * See @ref variable_scaling "Variable scaling" for more information.
    */
-  void SetVariableScaling(double scale, int idx_start, int idx_end);
+  void SetVariableScaling(double s, int idx_start, int idx_end);
+
+  /**
+   * Setter for resetting the scaling of decision variables.
+   * @param s scaling factor (must be positive).
+   * @param idx index of the decision variable.
+   *
+   * See @ref variable_scaling "Variable scaling" for more information.
+   */
+  void ResetVariableScaling(double s, int idx);
+
+  /**
+   * Setter for resetting the scaling of decision variables starting from index
+   * @p idx_start to @p idx_end (including @p idx_end).
+   * @param s scaling factor (must be positive).
+   * @param idx_start index of the start of the decision variables.
+   * @param idx_end index of the end of the decision variables.
+   *
+   * See @ref variable_scaling "Variable scaling" for more information.
+   */
+  void ResetVariableScaling(double s, int idx_start, int idx_end);
+  //@}
 
  private:
   static void AppendNanToEnd(int new_var_size, Eigen::VectorXd* vector);
