@@ -2754,7 +2754,7 @@ class MathematicalProgram {
    *
    * See @ref variable_scaling "Variable scaling" for more information.
    */
-  void SetVariableScaling(double s, int idx, bool is_update);
+  void SetVariableScaling(double s, int idx, bool is_update = true);
 
   /**
    * Setter for the scaling of decision variables starting from index @p
@@ -2767,7 +2767,8 @@ class MathematicalProgram {
    *
    * See @ref variable_scaling "Variable scaling" for more information.
    */
-  void SetVariableScaling(double s, int idx_start, int idx_end, bool is_update);
+  void SetVariableScaling(double s, int idx_start, int idx_end,
+                          bool is_update = true);
   //@}
 
  private:
