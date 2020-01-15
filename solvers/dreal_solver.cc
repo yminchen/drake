@@ -13,6 +13,7 @@
 
 #include <dreal/dreal.h>
 
+#include "drake/common/text_logging.h"
 #include "drake/solvers/mathematical_program.h"
 
 namespace drake {
