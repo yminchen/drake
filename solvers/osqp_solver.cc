@@ -254,6 +254,10 @@ void SetDualSolution(
 
 bool OsqpSolver::is_available() { return true; }
 
+
+Eigen::VectorXd dual_initial_guess;
+int counting = 0;
+
 void OsqpSolver::DoSolve(
     const MathematicalProgram& prog,
     const Eigen::VectorXd& initial_guess,
@@ -326,6 +330,24 @@ void OsqpSolver::DoSolve(
     }
   }
 
+  // Set initial guess
+  c_float primal_init_guess[initial_guess.size()];
+  for (int i = 0; i < initial_guess.size(); i++) {
+    primal_init_guess[i] = (c_float) initial_guess(i);
+    // std::cout << "i: " << primal_init_guess[i] << std::endl;
+  }
+  if (counting == 0) {
+    osqp_warm_start_x(work, primal_init_guess);
+  } else {
+    c_float dual_init_guess[dual_initial_guess.size()];
+    for (int i = 0; i < dual_initial_guess.size(); i++) {
+      dual_init_guess[i] = (c_float) dual_initial_guess(i);
+      // std::cout << "i: " << dual_init_guess[i] << std::endl;
+    }
+    c_int ret = osqp_warm_start(work, primal_init_guess, dual_init_guess);
+    // std::cout << "ret = " << ret << std::endl;
+  }
+
   // Solve problem.
   if (!solution_result) {
     DRAKE_THROW_UNLESS(work != nullptr);
@@ -334,6 +356,8 @@ void OsqpSolver::DoSolve(
       solution_result = SolutionResult::kInvalidInput;
     }
   }
+
+  counting++;
 
   // Extract results.
   if (!solution_result) {
@@ -364,6 +388,8 @@ void OsqpSolver::DoSolve(
                         constraint_start_row, result);
         SetDualSolution(prog.bounding_box_constraints(), solver_details.y,
                         constraint_start_row, result);
+        // std::cout << "solver_details.y = " << solver_details.y << std::endl;
+        dual_initial_guess = solver_details.y;
 
         break;
       }
