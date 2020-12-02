@@ -137,6 +137,10 @@ class RevoluteJoint final : public Joint<T> {
   /// Returns `this` joint's damping constant in N⋅m⋅s.
   double damping() const { return damping_; }
 
+
+  void set_damping(double damping) {damping_ = damping; }
+
+
   /// Returns the position lower limit for `this` joint in radians.
   double position_lower_limit() const {
     return this->position_lower_limits()[0];
